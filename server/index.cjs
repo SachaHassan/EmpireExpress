@@ -96,7 +96,7 @@ io.on('connection', (socket) => {
 
     if (result.phaseComplete || result.nextStep !== undefined) {
       emitGameState(code, room);
-      if (room.game.phase === 'planning') {
+      if (room.game.phase === 'planning' || room.game.phase === 'draft') {
         processBots(code);
       }
     } else {
