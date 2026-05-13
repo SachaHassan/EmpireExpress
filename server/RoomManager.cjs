@@ -21,7 +21,21 @@ class RoomManager {
     return code;
   }
 
+  leaveAllRooms(playerId) {
+    for (const [code, room] of this.rooms) {
+      const idx = room.players.findIndex(p => p.id === playerId);
+      if (idx !== -1) {
+        room.players.splice(idx, 1);
+        // If host leaves lobby or room is empty, delete it
+        if (room.players.length === 0 || (room.status === 'lobby' && room.hostId === playerId)) {
+          this.rooms.delete(code);
+        }
+      }
+    }
+  }
+
   createRoom(hostId, hostName) {
+    this.leaveAllRooms(hostId);
     const code = this.generateCode();
     this.rooms.set(code, {
       code,
@@ -42,6 +56,7 @@ class RoomManager {
     if (room.players.length + room.bots.length >= 5) return { error: 'Salon plein (5 max)' };
     if (room.players.find(p => p.id === playerId)) return { error: 'Déjà dans le salon' };
 
+    this.leaveAllRooms(playerId);
     room.players.push({ id: playerId, name: playerName, isBot: false, connected: true });
     return { success: true, room: this.getRoomInfo(code) };
   }
